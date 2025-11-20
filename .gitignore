@@ -1,0 +1,17 @@
+# Build artifacts / binaries
+*.exe
+*.o
+*.out
+
+# Python junk
+__pycache__/
+*.pyc
+
+# Generated data / figures
+output.csv
+*.png
+
+# Editor / OS cruft
+.vscode/
+*.swp
+.DS_Store

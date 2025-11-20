@@ -1,0 +1,88 @@
+# ------------------------------------------------------------
+# 0D LINEAR RLC CHAIN MODEL (NODE-BASED)
+#
+# State variables:
+#   P_i(t)  : pressure at node i,  i = 0..N-1
+#   Q_e(t)  : flow in segment e,   e = 0..N-1
+#
+# Topology (example N=5):
+#
+#   Qin(t) --> [node 0] --(R0, L0, Q0)--> [node 1] --(R1, L1, Q1)--> ...
+#                 |                          |
+#                 C0                         C1
+#
+#
+#   [node 2] --(R2, L2, Q2)--> [node 3] --(R3, L3, Q3)--> [node 4] --(R4, L4, Q4)--> RA (P_RA)
+#      |                          |                           |
+#      C2                         C3                         C4
+#
+# Each node i has:
+#   - Compliance C_i [mL/mmHg]
+# Each segment e has:
+#   - Resistance R_e [mmHg·s/mL]
+#   - Inertance L_e [mmHg·s^2/mL]
+#
+# Governing equations (chain):
+#
+#   Node 0:      C0 dP0/dt = Qin(t) - Q0
+#   Node i>0:    Ci dPi/dt = Q_{i-1} - Q_i,      i = 1..N-2
+#   Node N-1:    C_{N-1} dP_{N-1}/dt = Q_{N-2} - Q_{N-1}
+#
+#   Segment e=0..N-2:   Le dQe/dt = (Pe - P_{e+1}) - Re Qe
+#   Segment e=N-1:      L_{N-1} dQ_{N-1}/dt = (P_{N-1} - P_RA) - R_{N-1} Q_{N-1}
+#
+# Parameters in this file use node/segment indices:
+#   C0, C1, ..., C4      : compliances at nodes 0..4
+#   R0, R1, ..., R4      : resistances at segments 0..4
+#   L0, L1, ..., L4      : inertances at segments 0..4
+#   P0_0, P0_1, ...      : initial pressures P_i(0)
+#   P_RA                 : right atrial pressure (final node)
+#   T_cycle              : cardiac period for analytic Qin(t) (if used)
+#   t_final, dt          : time-stepping control
+#   use_csv, inflow_csv  : inflow control (CSV vs analytic)
+# ------------------------------------------------------------
+
+# ---- Parameters (theta) ----
+
+# Node compliances C_i [mL/mmHg]
+C0 = 1.5     # aorta
+C1 = 1.0     # large arteries
+C2 = 0.5     # arterioles
+C3 = 0.2     # capillaries
+C4 = 30.0    # veins
+
+# Segment resistances R_e (0..4) [mmHg-s/mL ]
+R0 = 0.10    # ao -> art
+R1 = 0.15    # art -> artr
+R2 = 0.35    # artr -> cap
+R3 = 0.35    # cap -> ven
+R4 = 0.11    # ven -> RA
+
+# Segment inertances L_e (0..4) [mmHg-s^2/mL ]
+L0 = 0.0   # inertance in aorta
+L1 = 0.0
+L2 = 0.0
+L3 = 0.0
+L4 = 0.0
+
+# Right atrial pressure
+P_RA = 2.0   # [mmHg]
+
+# ---- Initial pressures ----
+P0_0 = 100.0   # aorta
+P0_1 = 95.0
+P0_2 = 60.0
+P0_3 = 30.0
+P0_4 = 5.0
+
+# ---- Time-stepping ----
+t_final = 20.0     # simulate ~ 10 s (~10 cycles)
+dt      = 1.0e-3
+
+# ---- Inflow control ----
+use_csv   = 1
+inflow_csv = AAo.csv # Input file name (dir: VascularCircuit0D/input/(inflow_name).csv)
+
+    # (OPTIONAL) If use_csv=0, analytic Q_in(t) uses:
+    T_cycle = 1.0
+    # Qin(t) = 80 + 40 sin(2π t / T_cycle) in Q_in_analytic()
