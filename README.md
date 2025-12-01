@@ -7,7 +7,7 @@ ctrl+f "setme" and change the working directory.
 
 ## Input file - RLC serial chain circuit. User input parameters.
 
-VascularCircuit0D/input/input.inp
+`VascularCircuit0D/input/input.inp`
 
 ## Compilation/Build:
 
@@ -17,16 +17,18 @@ VascularCircuit0D/input/input.inp
 
 `./solver_serial.exe`
 
-## Output
+### Output
 
 `VascularCircuit0D/output.csv`
 
 ## Post-processing:
 
-# run:
+### Run:
 
 `python plot.py`
 
-# Output: 
-1. `VascularCircuit0D/flow.png`     # Q_i
-2. `VascularCircuit0D/pressure.png` # P_i
+### Output:
+
+1. $Q_i:$ `VascularCircuit0D/flow.png`
+
+2. $P_i:$ `VascularCircuit0D/pressure.png`
