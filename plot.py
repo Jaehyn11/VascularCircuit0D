@@ -1,27 +1,29 @@
 import matplotlib
+
 matplotlib.use("Agg")  # non-interactive backend
+import math
+import os
+
 import matplotlib.pyplot as plt
 import numpy as np
-import os
-import math
 
 # ---------------- User settings ----------------
-output_csv = "output.csv"   # solver output: t, P_0.., Q_0..
+output_csv = "output.csv"  # solver output: t, P_0.., Q_0..
 # Build inflow path from $HOME
 home = os.path.expanduser("~")
 base = os.path.join(home, "NERS570", "VascularCircuit0D")  # setme
 inflow_csv = os.path.join(base, "input", "AAo.csv")
+inflow_csv = "./input/AAo.csv"  # override for local testing
 # ------------------------------------------------
 
+
 def latex_name(varname):
-    """
-    Converts column name like 'P_0' → r'$P_{\\mathrm{0}}$'
-    """
+    """Converts column name like 'P_0' → r'$P_{\\mathrm{0}}$'"""
     if "_" in varname:
         base, sub = varname.split("_", 1)
         return rf"${base}_{{\mathrm{{{sub}}}}}$"
-    else:
-        return rf"${varname}$"
+    return rf"${varname}$"
+
 
 # 1. Load solver output
 data = np.genfromtxt(output_csv, delimiter=",", names=True)
@@ -30,7 +32,7 @@ t = data["t"]
 # Separate pressure and flow columns by prefix
 all_names = data.dtype.names
 pressure_names = [name for name in all_names if name.startswith("P_")]
-flow_names     = [name for name in all_names if name.startswith("Q_")]
+flow_names = [name for name in all_names if name.startswith("Q_")]
 
 # 2. Load inflow CSV: time [s], Q [mL/s]
 inflow_data = np.genfromtxt(inflow_csv, delimiter=",", names=True)
