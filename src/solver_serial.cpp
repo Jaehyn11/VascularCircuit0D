@@ -337,6 +337,11 @@ int main(int argc, char *argv[]) {
   std::string input_file = argv[1];
   std::string inflow_csv_name;
 
+  if (argc < 2) {
+    std::cerr << "Usage: " << argv[0] << " input.inp\n";
+    return 1;
+  }
+
   // 1. Read input.inp for theta, ICs, and time-stepping
   if (!load_input_file(input_file, par, s, t_final, dt, use_csv,
                        inflow_csv_name)) {
@@ -464,7 +469,8 @@ int main(int argc, char *argv[]) {
     t += dt;
 
     // Compute flows for output/diagnostics
-    auto Qout = compute_Qout(s, par);
+    // auto Qout = compute_Qout(s, par); // commented out because unused and
+    // -Werror is on
 
     // output.csv header: time, pressures, flows for this step
     fout << t;
