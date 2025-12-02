@@ -330,17 +330,18 @@ void rhs_full(double t, const State &s, const Parameters &par,
 }
 
 int main(int argc, char *argv[]) {
+
+  if (argc < 2) {
+    std::cerr << "Usage: " << argv[0] << " path/to/input.inp\n";
+    return 1;
+  }
+
   Parameters par;
   State s, k1, k2;
   double t_final, dt;
   bool use_csv;
   std::string input_file = argv[1];
   std::string inflow_csv_name;
-
-  if (argc < 2) {
-    std::cerr << "Usage: " << argv[0] << " input.inp\n";
-    return 1;
-  }
 
   // 1. Read input.inp for theta, ICs, and time-stepping
   if (!load_input_file(input_file, par, s, t_final, dt, use_csv,
