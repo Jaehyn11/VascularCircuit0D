@@ -96,27 +96,27 @@ bool load_input_file(const std::string &filename, Parameters &par, State &s0,
     // Numeric or string
     // ------------------ C_i ------------------
     if (!name.empty() && name[0] == 'C') {
-      int idx = std::stoi(name.substr(1));
+      size_t idx = static_cast<size_t>(std::stoi(name.substr(1)));
       if (0 <= idx && idx < N_NODES)
         par.C[idx] = std::stod(value);
     }
     // ------------------ R_i ------------------
     else if (!name.empty() && name[0] == 'R') {
       // R0, R1, R2, ...
-      int idx = std::stoi(name.substr(1));
+      size_t idx = static_cast<size_t>(std::stoi(name.substr(1)));
       if (0 <= idx && idx < N_SEGS)
         par.R[idx] = std::stod(value);
     }
     // ------------------ L_i ------------------
     else if (!name.empty() && name[0] == 'L') {
-      int idx = std::stoi(name.substr(1));
+      size_t idx = static_cast<size_t>(std::stoi(name.substr(1)));
       if (0 <= idx && idx < N_SEGS)
         par.L[idx] = std::stod(value);
     }
     // ------------------ P0_i ------------------
     else if (name.rfind("P0_", 0) == 0) {
       // P0_i = initial pressure at node i
-      int idx = std::stoi(name.substr(3));
+      size_t idx = static_cast<size_t>(std::stoi(name.substr(3)));
       if (0 <= idx && idx < N_NODES)
         s0.P[idx] = std::stod(value);
     } else if (name == "P_RA")
@@ -134,9 +134,9 @@ bool load_input_file(const std::string &filename, Parameters &par, State &s0,
   }
 
   // Initialize flows after loading parameters
-  for (int e = 0; e < N_SEGS; ++e) {
-    int i = e;
-    int j = e + 1;
+  for (size_t e = 0; e < N_SEGS; ++e) {
+    size_t i = e;
+    size_t j = e + 1;
 
     double Pup = s0.P[i];
     double Pdown = (j < N_NODES ? s0.P[j] : par.P_RA);
@@ -277,7 +277,7 @@ void rhs_full(double t, const State &s, const Parameters &par,
   std::array<double, N_SEGS> Qeff;
 
   // 1) dQ/dt for each segment and Qeff[e] for mass balance
-  for (int e = 0; e < N_SEGS; ++e) {
+  for (size_t e = 0; e < N_SEGS; ++e) {
     double Pup, Pdown;
 
     if (e < N_NODES - 1) {
@@ -315,7 +315,7 @@ void rhs_full(double t, const State &s, const Parameters &par,
   netQ[0] = Qin - Qeff[0];
 
   // Internal nodes: i = 1..N_NODES-2
-  for (int i = 1; i < N_NODES - 1; ++i) {
+  for (size_t i = 1; i < N_NODES - 1; ++i) {
     netQ[i] = Qeff[i - 1] - Qeff[i];
   }
 
@@ -324,7 +324,7 @@ void rhs_full(double t, const State &s, const Parameters &par,
   netQ[N_NODES - 1] = Qeff[N_NODES - 2] - Qeff[N_SEGS - 1];
 
   // 3) dP/dt = netQ / C
-  for (int i = 0; i < N_NODES; ++i) {
+  for (size_t i = 0; i < N_NODES; ++i) {
     ddt.P[i] = netQ[i] / par.C[i]; // [mmHg/s]
   }
 }
@@ -382,7 +382,7 @@ int main(int argc, char *argv[]) {
   // Compute Q for output (IMPORTANT: dynamic if L>0, Ohm's law if L==0)
   auto compute_Qout = [&](const State &s, const Parameters &par) {
     std::array<double, N_SEGS> Qout;
-    for (int e = 0; e < N_SEGS; ++e) {
+    for (size_t e = 0; e < N_SEGS; ++e) {
       double Pup, Pdown;
       if (e < N_NODES - 1) {
         Pup = s.P[e];
@@ -404,9 +404,9 @@ int main(int argc, char *argv[]) {
   // write initial state
   auto Qout0 = compute_Qout(s, par);
   fout << t;
-  for (int i = 0; i < N_NODES; ++i)
+  for (size_t i = 0; i < N_NODES; ++i)
     fout << "," << s.P[i];
-  for (int e = 0; e < N_SEGS; ++e)
+  for (size_t e = 0; e < N_SEGS; ++e)
     fout << "," << Qout0[e];
   fout << "\n";
 
@@ -440,10 +440,10 @@ int main(int argc, char *argv[]) {
     // Predictor step: forward Euler guess at t + dt
     // s_pred = s^n + dt * k1
     State s_pred;
-    for (int i = 0; i < N_NODES; ++i) {
+    for (size_t i = 0; i < N_NODES; ++i) {
       s_pred.P[i] = s.P[i] + dt * k1.P[i]; // predicted pressures
     }
-    for (int e = 0; e < N_SEGS; ++e) {
+    for (size_t e = 0; e < N_SEGS; ++e) {
       s_pred.Q[e] = s.Q[e] + dt * k1.Q[e]; // predicted flows
     }
 
@@ -453,10 +453,10 @@ int main(int argc, char *argv[]) {
 
     // Corrector step: average slopes k1 and k2
     // s^{n+1} = s^n + (dt/2) * (k1 + k2)
-    for (int i = 0; i < N_NODES; ++i) {
+    for (size_t i = 0; i < N_NODES; ++i) {
       s.P[i] += 0.5 * dt * (k1.P[i] + k2.P[i]);
     }
-    for (int e = 0; e < N_SEGS; ++e) {
+    for (size_t e = 0; e < N_SEGS; ++e) {
       s.Q[e] += 0.5 * dt * (k1.Q[e] + k2.Q[e]);
     }
 
@@ -468,9 +468,9 @@ int main(int argc, char *argv[]) {
 
     // output.csv header: time, pressures, flows for this step
     fout << t;
-    for (int i = 0; i < N_NODES; ++i)
+    for (size_t i = 0; i < N_NODES; ++i)
       fout << "," << s.P[i];
-    for (int e = 0; e < N_SEGS; ++e)
+    for (size_t e = 0; e < N_SEGS; ++e)
       fout << "," << s.Q[e];
     fout << "\n";
 
