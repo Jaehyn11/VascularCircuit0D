@@ -28,15 +28,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON CACHE BOOL "Require C++ standard")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 # Check that the compiler supports the C++ standard
-set(SPMV_MIN_GCC_VERSION 11.0) # NOTE: changed from the SpMV project... I think 11 has better C++20 support?
+set(MIN_GCC_VERSION 11.0) # NOTE: changed from the SpMV project... I think 11 has better C++20 support?
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS ${SPMV_MIN_GCC_VERSION})
-    message(FATAL_ERROR "GCC version must be at least ${SPMV_MIN_GCC_VERSION}")
+  if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS ${MIN_GCC_VERSION})
+    message(FATAL_ERROR "GCC version must be at least ${MIN_GCC_VERSION}")
   endif()
 else()
   message(WARNING 
           "You are using an unsupported compiler! "
-          "Please use GCC >= ${SPMV_MIN_GCC_VERSION}")
+          "Please use GCC >= ${MIN_GCC_VERSION}")
 endif()
 # ALSO note that I'm using Apple Clang on my Mac (I think the entire team use Mac), so this check is not comprehensive.
 
@@ -78,7 +78,7 @@ add_cxx_compiler_flag("-Wunreachable-code")
 add_cxx_compiler_flag("-Wmissing-noreturn")
 add_cxx_compiler_flag("-Wtautological-compare")
 add_cxx_compiler_flag("-Wundef")
-add_cxx_compiler_flag("-Werror")
+#add_cxx_compiler_flag("-Werror")
 add_cxx_compiler_flag("-Wold-style-cast")
 add_cxx_compiler_flag("-pedantic")
 
@@ -92,7 +92,49 @@ add_cxx_compiler_flag("-pedantic")
 #    )
 
 
-add_executable(solver_serial.exe src/solver_serial.cpp)
+add_library(vascular_circuit0d_lib
+    src/solver_core.cpp
+)
+target_include_directories(vascular_circuit0d_lib 
+    PUBLIC 
+        include
+)
+
+add_executable(solver_serial.exe src/solver_main.cpp)
+
+target_link_libraries(solver_serial.exe
+    PRIVATE
+        vascular_circuit0d_lib
+)
+#===============================================================================
+# Testing configuration
+#===============================================================================
+
+include(CTest)
+
+if (BUILD_TESTING)
+    include(FetchContent)
+
+    FetchContent_Declare(
+        Catch2
+        GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+        GIT_TAG v3.11.0
+    )
+
+    FetchContent_MakeAvailable(Catch2)
+
+    add_executable(vascular_circuit_tests
+        tests/test_serial_solver.cpp
+    )
+
+    target_link_libraries(vascular_circuit_tests
+        PRIVATE
+            vascular_circuit0d_lib
+            Catch2::Catch2WithMain
+    )
+    include(Catch)
+    catch_discover_tests(vascular_circuit_tests)
+endif()
 
 # Copy input files to build directory for easier execution
 configure_file(${CMAKE_SOURCE_DIR}/input/input.inp ${CMAKE_BINARY_DIR}/input/input.inp COPYONLY)

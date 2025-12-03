@@ -1,8 +1,9 @@
 # Build artifacts / binaries
-/build/
+build/
 *.exe
 *.o
 *.out
+.cache/
 
 # Python junk
 __pycache__/
