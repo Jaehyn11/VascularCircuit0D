@@ -5,25 +5,29 @@
 #include <vector>
 
 constexpr int N_NODES = 5;
-constexpr int N_SEGS = 5;
+constexpr int N_SEGS = 5; // 0..3: between nodes, 4: last node -> RA
 
 // Parameters and state used by solver core
+// 1-1. Parameters for the simulation (theta vector)
 struct Parameters {
-  std::array<double, N_NODES> C;
-  std::array<double, N_SEGS> R;
-  std::array<double, N_SEGS> L;
-  double P_RA;
-  double T_cycle;
+  std::array<double, N_NODES> C; // Compliances [mL/mmHg] C[i] at node i
+  std::array<double, N_SEGS> R;  // Segment resistances [mmHg·s/mL] for flows
+  std::array<double, N_SEGS> L;  // Inductances: L[e] at segment e
+
+  double P_RA;    // Right atrium pressure [mmHg]
+  double T_cycle; // Cardiac period (for analytic inflow) [s]
 };
 
+// 1-2. State vector: node pressures (y vector)
 struct State {
-  std::array<double, N_NODES> P;
-  std::array<double, N_SEGS> Q;
+  std::array<double, N_NODES> P; // P[i] = pressure at node i
+  std::array<double, N_SEGS> Q;  // flows in segments
 };
 
+// 2. Inflow data aquisition
 struct InflowData {
-  std::vector<double> t;
-  std::vector<double> q;
+  std::vector<double> t; // time [s]
+  std::vector<double> q; // flow [mL/s]
   bool loaded = false;
 };
 
