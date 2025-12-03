@@ -93,17 +93,19 @@ add_cxx_compiler_flag("-pedantic")
 
 
 add_library(vascular_circuit0d_lib
-    src/solver_serial.cpp
+    src/solver_core.cpp
 )
 target_include_directories(vascular_circuit0d_lib 
     PUBLIC 
-        src 
         include
 )
 
-add_executable(solver_serial.exe src/solver_serial.cpp)
+add_executable(solver_serial.exe src/solver_main.cpp)
 
-
+target_link_libraries(solver_serial.exe
+    PRIVATE
+        vascular_circuit0d_lib
+)
 #===============================================================================
 # Testing configuration
 #===============================================================================
@@ -131,7 +133,7 @@ if (BUILD_TESTING)
             Catch2::Catch2WithMain
     )
     include(Catch)
-    #catch_discover_tests(vascular_circuit_tests)
+    catch_discover_tests(vascular_circuit_tests)
 endif()
 
 # Copy input files to build directory for easier execution
