@@ -1,4 +1,4 @@
-#include "../include/solver_core.hpp"
+#include "solver_core.hpp"
 #include <algorithm>
 #include <array>
 #include <cctype>

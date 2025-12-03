@@ -1,4 +1,4 @@
-#include "../include/solver_core.hpp"
+#include "solver_core.hpp"
 #include <array>
 #include <cctype>
 #include <cstdlib>
