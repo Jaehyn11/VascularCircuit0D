@@ -2,7 +2,6 @@
 #include <algorithm>
 #include <array>
 #include <cctype>
-#define _USE_MATH_DEFINES // Must be defined before including cmath or math.h
 #include <cmath>
 #include <cstdlib>
 #include <fstream>

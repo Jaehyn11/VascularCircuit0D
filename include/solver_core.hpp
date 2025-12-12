@@ -4,6 +4,10 @@
 #include <string>
 #include <vector>
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 constexpr int N_NODES = 5;
 constexpr int N_SEGS = 5; // 0..3: between nodes, 4: last node -> RA
 
