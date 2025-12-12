@@ -45,18 +45,18 @@
 # ---- Parameters (theta) ----
 
 # Node compliances C_i [mL/mmHg]
-C0 = 1.5     # aorta
-C1 = 1.0     # large arteries
-C2 = 0.5     # arterioles
-C3 = 0.2     # capillaries
-C4 = 30.0    # veins
+C0 = 1.47     # aorta
+C1 = 0.49     # large arteries
+C2 = 0.088     # arterioles
+C3 = 0.0147     # capillaries
+C4 = 0.0    # veins
 
 # Segment resistances R_e (0..4) [mmHg-s/mL ]
-R0 = 0.10    # ao -> art
+R0 = 0.15    # ao -> art
 R1 = 0.15    # art -> artr
 R2 = 0.35    # artr -> cap
 R3 = 0.35    # cap -> ven
-R4 = 0.11    # ven -> RA
+R4 = 0.00    # ven -> RA
 
 # Segment inertances L_e (0..4) [mmHg-s^2/mL ]
 L0 = 0.0   # inertance in aorta
@@ -66,22 +66,22 @@ L3 = 0.0
 L4 = 0.0
 
 # Right atrial pressure
-P_RA = 2.0   # [mmHg]
+P_RA = 0.0   # [mmHg]
 
-# ---- Initial pressures ----
-P0_0 = 100.0   # aorta
-P0_1 = 95.0
-P0_2 = 60.0
-P0_3 = 30.0
-P0_4 = 5.0
+# Initial pressures
+P0_0 = 75.0   # aorta
+P0_1 = 75.0
+P0_2 = 75.0
+P0_3 = 75.0
+P0_4 = 0.0
 
-# ---- Time-stepping ----
-t_final = 20.0     # simulate ~ 10 s (~10 cycles)
+# Time-stepping
+t_final = 1.0     # simulate ~ 10 s (~10 cycles)
 dt      = 1.0e-3
 
-# ---- Inflow control ----
+# Inflow control
 use_csv   = 1
-inflow_csv = AAo.csv # Input file name (dir: VascularCircuit0D/input/(inflow_name).csv)
+inflow_csv = AAo4.csv # Input file name (dir: VascularCircuit0D/input/(inflow_name).csv)
 
     # (OPTIONAL) If use_csv=0, analytic Q_in(t) uses:
     T_cycle = 1.0
