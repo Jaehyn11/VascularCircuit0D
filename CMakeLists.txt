@@ -95,13 +95,6 @@ endif()
 #===============================================================================
 # Create the library
 #===============================================================================
-
-# Source files
-#set(VASCULAR_CIRCUIT_SOURCES
-#    "src/solver_serial.cpp"
-#    )
-
-
 add_library(vascular_circuit0d_lib
     src/solver_core.cpp
 )
@@ -117,7 +110,7 @@ target_link_libraries(solver_serial.exe
         vascular_circuit0d_lib
 )
 #===============================================================================
-# Testing configuration
+# Testing
 #===============================================================================
 
 # Ensure BUILD_TESTING defaults to OFF unless the user explicitly enables it

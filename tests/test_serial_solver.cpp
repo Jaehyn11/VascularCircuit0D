@@ -58,6 +58,32 @@ TEST_CASE("HANDLE INPUT FILE CORRECTLY", "[input]") {
   }
 }
 
+TEST_CASE("HANDLE INFLOW CSV", "[input, flows]") {
+
+  InflowData inflow_data;
+
+  SECTION("Non-existent file") {
+    std::string inflow_csv = "non_existent_file.csv";
+    bool result = load_inflow_csv(inflow_csv, inflow_data);
+    REQUIRE(result == false);
+  }
+  SECTION("Existing file") {
+    std::string inflow_csv = "input/AAo.csv";
+    bool result = load_inflow_csv(inflow_csv, inflow_data);
+    REQUIRE(result == true);
+    REQUIRE(inflow_data.loaded == true);
+    REQUIRE(inflow_data.t.size() == 40);
+    REQUIRE(inflow_data.q.size() == 40);
+
+    // Checking the 14th point (index 13) because I don't want to hardcode the
+    // whole file
+    REQUIRE_THAT(inflow_data.t[13],
+                 Catch::Matchers::WithinAbs(0.338755980861244, 1e-6));
+    REQUIRE_THAT(inflow_data.q[13],
+                 Catch::Matchers::WithinAbs(18.04337363041816, 1e-6));
+  }
+}
+
 TEST_CASE("ANALYTIC FLOWS", "[flows]") {
   Parameters par;
   par.T_cycle = 1.0;
@@ -72,4 +98,65 @@ TEST_CASE("ANALYTIC FLOWS", "[flows]") {
     double flow = Q_in_analytic(t, par);
     REQUIRE_THAT(flow, Catch::Matchers::WithinAbs(120.0, 1e-6));
   }
+}
+
+TEST_CASE("Q_IN_FROM_CSV", "[input, flows]") {
+  InflowData inflow_data;
+  std::string inflow_csv = "input/AAo.csv";
+  bool result = load_inflow_csv(inflow_csv, inflow_data);
+
+  SECTION("Interpolation") {
+    double t = 0.0;
+    double q_in = Q_in_from_csv(t, inflow_data);
+    REQUIRE_THAT(q_in, Catch::Matchers::WithinAbs(-2.67291413040408798, 1e-6));
+  }
+
+  SECTION("Clamping") {
+    double t = 1.0133971291866029;
+    double q_in = Q_in_from_csv(t, inflow_data);
+    REQUIRE_THAT(q_in, Catch::Matchers::WithinAbs(-4.733727810650976, 1e-6));
+  }
+}
+
+TEST_CASE("Q_IN", "[flows]") {
+  Parameters par;
+  par.T_cycle = 1.0;
+  double t = 0.0;
+
+  InflowData inflow_data;
+  std::string inflow_csv = "input/AAo.csv";
+  bool result = load_inflow_csv(inflow_csv, inflow_data);
+
+  SECTION("Analytic") {
+    bool use_csv = false;
+    double q_in = Q_in(t, par, inflow_data, use_csv);
+    REQUIRE_THAT(q_in, Catch::Matchers::WithinAbs(80.0, 1e-6));
+  }
+
+  SECTION("CSV") {
+    bool use_csv = true;
+    double q_in = Q_in(t, par, inflow_data, use_csv);
+    REQUIRE_THAT(q_in, Catch::Matchers::WithinAbs(-2.67291413040408798, 1e-6));
+  }
+}
+
+TEST_CASE("SOLVER CHECKS", "[solver]") {
+  double t = 0.0;
+  Parameters par;
+  State s0;
+  State s1;
+  double t_final, dt;
+  bool use_csv;
+  std::string inflow_csv;
+
+  bool result1 = load_input_file("input/input.inp", par, s0, t_final, dt,
+                                 use_csv, inflow_csv);
+
+  InflowData inflow_data;
+  bool result2 = load_inflow_csv(inflow_csv, inflow_data);
+
+  rhs_full(t, s0, par, inflow_data, use_csv, s1);
+
+  REQUIRE_THAT(s1.Q[0], Catch::Matchers::WithinAbs(0.0, 1e-6));
+  REQUIRE_THAT(s1.Q[4], Catch::Matchers::WithinAbs(0.0, 1e-6));
 }
