@@ -59,28 +59,38 @@ macro(add_cxx_compiler_flag FLAG)
   endif()
 endmacro()
 
-# Set warning flags
-add_cxx_compiler_flag("-Wall")
-add_cxx_compiler_flag("-Wextra")
-add_cxx_compiler_flag("-Wcast-align")
-add_cxx_compiler_flag("-Wcast-qual")
-add_cxx_compiler_flag("-Wconversion")
-add_cxx_compiler_flag("-Wdouble-promotion")
-add_cxx_compiler_flag("-Wfloat-equal")
-add_cxx_compiler_flag("-Wimplicit-fallthrough")
-add_cxx_compiler_flag("-Wmissing-noreturn")
-add_cxx_compiler_flag("-Wnon-virtual-dtor")
-add_cxx_compiler_flag("-Wshadow")
-add_cxx_compiler_flag("-Wunused")
-add_cxx_compiler_flag("-Wvla")
-add_cxx_compiler_flag("-Wzero-as-null-pointer-constant")
-add_cxx_compiler_flag("-Wunreachable-code")
-add_cxx_compiler_flag("-Wmissing-noreturn")
-add_cxx_compiler_flag("-Wtautological-compare")
-add_cxx_compiler_flag("-Wundef")
-#add_cxx_compiler_flag("-Werror")
-add_cxx_compiler_flag("-Wold-style-cast")
-add_cxx_compiler_flag("-pedantic")
+# Set compiler flags per build type
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+  message(STATUS "Configuring debug compiler warnings")
+  # Debug: enable strict warnings
+  add_cxx_compiler_flag("-Wall")
+  add_cxx_compiler_flag("-Wextra")
+  add_cxx_compiler_flag("-Wcast-align")
+  add_cxx_compiler_flag("-Wcast-qual")
+  add_cxx_compiler_flag("-Wconversion")
+  add_cxx_compiler_flag("-Wdouble-promotion")
+  add_cxx_compiler_flag("-Wfloat-equal")
+  add_cxx_compiler_flag("-Wimplicit-fallthrough")
+  add_cxx_compiler_flag("-Wmissing-noreturn")
+  add_cxx_compiler_flag("-Wnon-virtual-dtor")
+  add_cxx_compiler_flag("-Wshadow")
+  add_cxx_compiler_flag("-Wunused")
+  add_cxx_compiler_flag("-Wvla")
+  add_cxx_compiler_flag("-Wzero-as-null-pointer-constant")
+  add_cxx_compiler_flag("-Wunreachable-code")
+  add_cxx_compiler_flag("-Wmissing-noreturn")
+  add_cxx_compiler_flag("-Wtautological-compare")
+  add_cxx_compiler_flag("-Wundef")
+  add_cxx_compiler_flag("-Wold-style-cast")
+  add_cxx_compiler_flag("-pedantic")
+elseif (CMAKE_BUILD_TYPE STREQUAL "Release") # this should be okay since there is behavior to switch to debug if no option provided
+  message(STATUS "Configuring release compiler flags")
+  # Release: optimize and disable asserts
+  add_cxx_compiler_flag("-O3")
+  add_cxx_compiler_flag("-march=native")
+  add_cxx_compiler_flag("-flto")
+  add_compile_definitions(NDEBUG)
+endif()
 
 #===============================================================================
 # Create the library
@@ -109,6 +119,9 @@ target_link_libraries(solver_serial.exe
 #===============================================================================
 # Testing configuration
 #===============================================================================
+
+# Ensure BUILD_TESTING defaults to OFF unless the user explicitly enables it
+option(BUILD_TESTING "Enable building and running tests" OFF)
 
 include(CTest)
 
