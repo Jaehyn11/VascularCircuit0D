@@ -90,6 +90,17 @@ elseif (CMAKE_BUILD_TYPE STREQUAL "Release") # this should be okay since there i
   add_cxx_compiler_flag("-march=native")
   add_cxx_compiler_flag("-flto")
   add_compile_definitions(NDEBUG)
+
+elseif (CMAKE_BUILD_TYPE STREQUAL "Coverage")
+  message(STATUS "Configuring coverage compiler flags")
+  # Coverage: enable coverage
+  add_cxx_compiler_flag("-O0")
+  add_cxx_compiler_flag("-g")
+  add_cxx_compiler_flag("-fprofile-arcs")
+  add_cxx_compiler_flag("-ftest-coverage")
+  add_compile_definitions(NDEBUG)
+else()
+  message(WARNING "Unknown build type: ${CMAKE_BUILD_TYPE}")
 endif()
 
 #===============================================================================
@@ -140,6 +151,12 @@ if (BUILD_TESTING)
     )
     include(Catch)
     catch_discover_tests(vascular_circuit_tests)
+endif()
+
+if (CMAKE_BUILD_TYPE STREQUAL "Coverage")
+  target_compile_options(vascular_circuit_tests PRIVATE -coverage)
+  target_link_options(vascular_circuit_tests PRIVATE -coverage)
+  add_test(NAME coverage COMMAND vascular_circuit_tests)
 endif()
 
 # Copy input files to build directory for easier execution
